@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="一枚中年少女码农~">
+<meta name="description" content="进入正题之前，我们先看一下经典的面试题目： for (var i = 0; i &amp;lt; 5; i++) {     (function(j) {         setTimeout(() =&amp;gt; {             console.log(new Date, j);         }, 1000);     })(i) }  console.log(new Date, i); 如">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
 <meta property="og:title" content="深入理解 ES7 的 async&#x2F;await">
 <meta property="og:url" content="https://lamp_cyan.github.io/2018/07/12/深入理解-ES7-的-async-await/index.html">
 <meta property="og:site_name" content="lamp_cyan">
-<meta property="og:description" content="一枚中年少女码农~">
+<meta property="og:description" content="进入正题之前，我们先看一下经典的面试题目： for (var i = 0; i &amp;lt; 5; i++) {     (function(j) {         setTimeout(() =&amp;gt; {             console.log(new Date, j);         }, 1000);     })(i) }  console.log(new Date, i); 如">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-07-12T02:30:51.344Z">
+<meta property="og:updated_time" content="2018-07-12T07:38:43.214Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="深入理解 ES7 的 async&#x2F;await">
-<meta name="twitter:description" content="一枚中年少女码农~">
+<meta name="twitter:description" content="进入正题之前，我们先看一下经典的面试题目： for (var i = 0; i &amp;lt; 5; i++) {     (function(j) {         setTimeout(() =&amp;gt; {             console.log(new Date, j);         }, 1000);     })(i) }  console.log(new Date, i); 如">
 
 
 
@@ -345,7 +345,76 @@
       
 
       
-        
+        <p>进入正题之前，我们先看一下经典的面试题目：</p>
+<pre><code>for (var i = 0; i &lt; 5; i++) {
+    (function(j) {
+        setTimeout(() =&gt; {
+            console.log(new Date, j);
+        }, 1000);
+    })(i)
+}
+
+console.log(new Date, i);
+</code></pre><p>如果想要实现每隔一秒输出，输出顺序为0，1，2，3，4，5，该怎么改呢？</p>
+<p>先说一下原始题目的输出结果：先输出5，然后顺次输出0，1，2，3，4，为什么会是这个结果呢 ?<code>for</code>循环里用到了闭包，利用一个匿名函数包裹出了一个块级作用域，每循环一次往匿名函数传入的参数会被拷贝一份，因此在<code>for</code>循环外console.log开始打印的时候i的循环已经结束，值为5，由于匿名函数中的setTimeout是异步的，因此外层console.log会先打印，然后顺次输出之前拷贝的值。另外，<code>for</code>循环还有一个特别之处，就是设置循环变量的那部分是一个父作用域，而循环体内部是一个单独的子作用域。</p>
+<p>but，用es6的<code>let</code>, 会提示    <code>i is is not defined</code>哦，至于原因大家可以去看看let 和 var的区别。</p>
+<p>言归正传，想要实现题目的中效果，有以下几种方式：</p>
+<ul>
+<li><p>ES5:</p>
+<pre><code>for (var i = 0; i &lt; 5; i++) {
+    (function(j) {
+        setTimeout(() =&gt; {
+            console.log(new Date, j);
+        }, 1000 * j);
+    })(i)
+}
+setTimeout(() =&gt; {
+    console.log(new Date, i);
+}, 1000*i)
+</code></pre><p>  既然全局的<code>i</code>已经变成了5，那么利用外层的setTimeout来异步输出，内部的setTimeout按照自己当前值的时间计数执行就好，这样会每隔1s输出一个数字，顺序为：0，1，2，3，4，5</p>
+</li>
+<li><p>ES6 Promise:</p>
+<pre><code>const taskArr = [];
+const output = (i) =&gt; {
+    return new Promise((resolve, reject) =&gt; {
+        setTimeout(() =&gt; {
+            console.log(new Date, i);
+            resolve();
+        }, 1000*i)
+    })
+}
+
+for (var i = 0; i &lt; 5; i++) {
+    taskArr.push(output(i));
+}
+
+Promise.all(taskArr).then(() =&gt; {
+    setTimeout(() =&gt; {
+        console.log(new Date, i);
+    }, 1000);
+});
+</code></pre><p>  定义一个<code>taskArr</code>数组存放异步操作的<code>promise</code>实例, 使用<code>Promise.all</code>等待所有的<code>promise</code>实例执行结束后，再继续往下执行。</p>
+</li>
+</ul>
+<ul>
+<li><p>ES7 async &amp;&amp; await</p>
+<pre><code>const sleep = (time) =&gt; new Promise((resolve) =&gt; {
+    setTimeout(resolve, time);
+});
+
+const asyncPrint = async () =&gt; {
+    for(var i = 0; i &lt; 5; i++) {
+        await sleep(1000);
+        console.log(new Date, i);
+    }
+    await sleep(1000);
+    console.log(new Date, i);
+}
+asyncPrint();
+</code></pre><p>  对比<code>Promise</code>和<code>async await</code> 可以说原理是类似的，<code>await</code>其实是<code>then</code>的语法糖。</p>
+</li>
+</ul>
+
       
     </div>
     
@@ -452,7 +521,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
