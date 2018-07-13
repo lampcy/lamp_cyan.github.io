@@ -266,7 +266,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://lamp_cyan.github.io/2018/07/12/深入理解-ES7-的-async-await/">
+    <link itemprop="mainEntityOfPage" href="https://lamp_cyan.github.io/2018/07/12/理解-ES7-的-async-await/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="lamp_cyan">
@@ -285,7 +285,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/07/12/深入理解-ES7-的-async-await/" itemprop="url">深入理解 ES7 的 async/await</a></h1>
+                <a class="post-title-link" href="/2018/07/12/理解-ES7-的-async-await/" itemprop="url">理解 ES7 的 async/await</a></h1>
         
 
         <div class="post-meta">
@@ -315,7 +315,7 @@
 
           
           
-             <span id="/2018/07/12/深入理解-ES7-的-async-await/" class="leancloud_visitors" data-flag-title="深入理解 ES7 的 async/await">
+             <span id="/2018/07/12/理解-ES7-的-async-await/" class="leancloud_visitors" data-flag-title="理解 ES7 的 async/await">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -414,9 +414,71 @@ const asyncPrint = async () =&gt; {
     console.log(new Date, i);
 }
 asyncPrint();
-</code></pre><p>  对比<code>Promise</code>和<code>async await</code> 可以说原理是类似的，<code>await</code>其实是<code>then</code>的语法糖。</p>
-</li>
+</code></pre></li>
 </ul>
+<p>通过上面的例子是不是大概清楚了async/await的用法了呢？</p>
+<h4 id="async-await"><a href="#async-await" class="headerlink" title="async/await"></a>async/await</h4><h5 id="async-返回值"><a href="#async-返回值" class="headerlink" title="async 返回值"></a>async 返回值</h5><p>有人说ES7定义出的<code>aysnc</code>函数终于让JavaScript对于异步操作有了终极解决方案，摆脱了回调地狱回调。简单俩说<code>async</code>用来定义一个异步函数，该函数返回了一个Promise对象，<code>await</code>从语义上理解就是等待的意思，<code>await</code>的承诺是风里雨里都会等待动作完成才会执行下面的操作，我们看下面的例子：</p>
+<pre><code>export const fn = () =&gt; {
+    return new Promise((resolve,reject) =&gt; {
+        setTimeout(() =&gt; {
+            resolve(1);
+        }, 2000)
+    });
+}
+
+(async () =&gt; {
+    await fn().then((res) =&gt; {
+        console.log(res);
+    });
+    console.log(2)
+})()
+</code></pre><p>输出结果：2s后打印1，然后打印2。就证明上面的解释，<code>await</code>会等待fn完全运行完成并且异步回调也执行完毕后才会继续往下执行。</p>
+<h5 id="async-处理异常"><a href="#async-处理异常" class="headerlink" title="async 处理异常"></a>async 处理异常</h5><p>我们先来下普通的回调函数是如何处理异常的：</p>
+<pre><code>var fs = require(&apos;fs&apos;);
+
+try{
+    fs.readFile(&apos;not_exist_file&apos;, &apos;utf8&apos;, function(err, data){
+        console.log(data);
+    });
+}
+catch(e){
+    console.log(&quot;error caught: &quot; + e);
+}
+</code></pre><p>输出结果为：undefined，而且不是catch里面捕获的错误。原因是：当文件不存在的时候，最外层的try catch并未捕获到异常，而是执行了try里面的执行不存在的文件，自然会输出undefined。由于异步调用分为两个阶段，一个是提交请求，一个处理结果，这两个阶段都有事件循环调用，属于不同的事件循环，彼此没有关联，callback属于处理结果的，而try catch属于外层的异步调用，只能处理当次时间循环中的异常，对callback无能为力，因此无法捕获callback的异常。</p>
+<p>async的异常处理</p>
+<p>不论是同步或者异步的异常，await都不会自动捕获，但是可以自动中函数，如：</p>
+<pre><code>export const fn = () =&gt; {
+    return new Promise((resolve,reject) =&gt; {
+        setTimeout(() =&gt; {
+            reject(&apos;出错了&apos;);
+        }, 2000)
+    });
+}
+
+(async () =&gt; {
+    await fn();
+    console.log(2);
+})()
+</code></pre><p>最后一行的<code>console.log(2)</code>永远都不会执行</p>
+<p>我们使用<code>try catch</code>来捕获异常，如：</p>
+<pre><code>export const fn = () =&gt; {
+    return new Promise((resolve,reject) =&gt; {
+        setTimeout(() =&gt; {
+            reject(&apos;出错了&apos;);
+        }, 2000)
+    });
+}
+
+(async () =&gt; {
+    try{
+        await fn();
+        console.log(&apos;1&apos;);
+    } catch (error) {
+        console.log(&apos;error&apos;, error);
+    }
+})()
+</code></pre><p><code>console.log(1)</code> 不执行，程序会输出<code>error 出错了</code>。</p>
+<p>关于<code>async await</code>的用法就写这么多，感觉很啰嗦，希望自己很久之后回过头来还看的懂。</p>
 
           
         
