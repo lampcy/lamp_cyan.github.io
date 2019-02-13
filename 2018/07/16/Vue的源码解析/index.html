@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="技术," />
 
 
 
@@ -79,16 +79,20 @@
 
 
 
-<meta name="description" content="一枚中年少女码农~">
-<meta property="og:type" content="website">
-<meta property="og:title" content="lamp_cyan">
-<meta property="og:url" content="https://lamp_cyan.github.io/index.html">
+<meta name="description" content="Vue是最典型的MVVM组件化框架，相对于MVC（虽然分层，但是需要手动维护数据和视图的关系），Vue是数据驱动视图，自动更新。今天我们来通过源码解析Vue的完整运行机制。    new Vue():  各种初始化的过程，源码入口有许多init函数，initMixin，stateMixin，eventsMixin，lifecycleMixin等来完成各种初始化工作； init:  在new Vu">
+<meta name="keywords" content="技术">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vue的源码解析">
+<meta property="og:url" content="https://lamp_cyan.github.io/2018/07/16/Vue的源码解析/index.html">
 <meta property="og:site_name" content="lamp_cyan">
-<meta property="og:description" content="一枚中年少女码农~">
+<meta property="og:description" content="Vue是最典型的MVVM组件化框架，相对于MVC（虽然分层，但是需要手动维护数据和视图的关系），Vue是数据驱动视图，自动更新。今天我们来通过源码解析Vue的完整运行机制。    new Vue():  各种初始化的过程，源码入口有许多init函数，initMixin，stateMixin，eventsMixin，lifecycleMixin等来完成各种初始化工作； init:  在new Vu">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://lamp_cyan.github.io/2018/07/16/Vue的源码解析/运行机制.jpg">
+<meta property="og:updated_time" content="2018-09-13T04:27:50.629Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="lamp_cyan">
-<meta name="twitter:description" content="一枚中年少女码农~">
+<meta name="twitter:title" content="Vue的源码解析">
+<meta name="twitter:description" content="Vue是最典型的MVVM组件化框架，相对于MVC（虽然分层，但是需要手动维护数据和视图的关系），Vue是数据驱动视图，自动更新。今天我们来通过源码解析Vue的完整运行机制。    new Vue():  各种初始化的过程，源码入口有许多init函数，initMixin，stateMixin，eventsMixin，lifecycleMixin等来完成各种初始化工作； init:  在new Vu">
+<meta name="twitter:image" content="https://lamp_cyan.github.io/2018/07/16/Vue的源码解析/运行机制.jpg">
 
 
 
@@ -118,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="https://lamp_cyan.github.io/"/>
+  <link rel="canonical" href="https://lamp_cyan.github.io/2018/07/16/Vue的源码解析/"/>
 
 
 
 
 
-  <title>lamp_cyan</title>
+  <title>Vue的源码解析 | lamp_cyan</title>
   
 
 
@@ -143,8 +147,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -251,9 +254,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -283,9 +286,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/16/Vue的源码解析/" itemprop="url">Vue的源码解析</a></h1>
+          <h1 class="post-title" itemprop="name headline">Vue的源码解析</h1>
         
 
         <div class="post-meta">
@@ -346,23 +347,26 @@
       
 
       
-        
-          
-          
-Vue是最典型的MVVM组件化框架，相对于MVC（虽然分层，但是需要手动维护数据和视图的关系），Vue是数据驱动视图，自动更新。今天我们来通过源码解析Vue的完整运行机制。
+        <blockquote>
+<p>Vue是最典型的MVVM组件化框架，相对于MVC（虽然分层，但是需要手动维护数据和视图的关系），Vue是数据驱动视图，自动更新。今天我们来通过源码解析Vue的完整运行机制。</p>
+</blockquote>
+<img src="/2018/07/16/Vue的源码解析/运行机制.jpg">
+<ul>
+<li>new Vue():<br>  各种初始化的过程，源码入口有许多init函数，<code>initMixin</code>，<code>stateMixin</code>，<code>eventsMixin</code>，<code>lifecycleMixin</code>等来完成各种初始化工作；</li>
+<li>init:<br>  在<code>new Vue()</code>之后又，通过调用<code>this._inint(options)</code>来初始化生命周期，事件，data，props，computed与watch等，通过<code>Object.defineProperty</code>设置<code>setter</code>与<code>getter</code>来实现响应式和依赖收集。</li>
+<li>$mount：<br>  初始化后挂载组件；</li>
+<li>compile：编译过程，这一步是为了实现将<code>template</code>编译成渲染<code>VNode</code>所需的<code>render function</code>。</li>
+<li>从    render function -&gt; watcher -&gt; patch() -&gt; Virtual DOM Tree  &amp;&amp; render function -&gt; Virtual DOM Tree：Vue的响应式。</li>
+</ul>
+<p>入口文件从<code>src/core/index.js</code>进入<br>    <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'./instance/index'</span>   <span class="comment">// vue核心方法</span></span><br><span class="line"><span class="keyword">import</span> &#123; initGlobalAPI &#125; <span class="keyword">from</span> <span class="string">'./global-api/index'</span></span><br><span class="line"><span class="keyword">import</span> &#123; isServerRendering &#125; <span class="keyword">from</span> <span class="string">'core/util/env'</span></span><br><span class="line"><span class="keyword">import</span> &#123; FunctionalRenderContext &#125; <span class="keyword">from</span> <span class="string">'core/vdom/create-functional-component'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化全局变量</span></span><br><span class="line">initGlobalAPI(Vue)</span><br><span class="line"></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(Vue.prototype, <span class="string">'$isServer'</span>, &#123;</span><br><span class="line">  get: isServerRendering</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(Vue.prototype, <span class="string">'$ssrContext'</span>, &#123;</span><br><span class="line">  get () &#123;</span><br><span class="line">    <span class="comment">/* istanbul ignore next */</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.$vnode &amp;&amp; <span class="keyword">this</span>.$vnode.ssrContext</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// expose FunctionalRenderContext for ssr runtime helper installation</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(Vue, <span class="string">'FunctionalRenderContext'</span>, &#123;</span><br><span class="line">  value: FunctionalRenderContext</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">Vue.version = <span class="string">'__VERSION__'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> Vue</span><br></pre></td></tr></table></figure></p>
+<p>本文主要是理解三个重要部分：响应式原理 &amp;&amp; compile &amp;&amp; 异步更新</p>
+<h4 id="响应式原理"><a href="#响应式原理" class="headerlink" title="响应式原理"></a>响应式原理</h4><p>new一个Vue实例时，会调用<code>init</code>初始化函操作，这部分代码在<code>src/core/instance/init.js</code>中，<br>    <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// vm生命周期相关变量初始化</span></span><br><span class="line">   initLifecycle(vm)</span><br><span class="line"></span><br><span class="line">   <span class="comment">// vm事件监听初始化</span></span><br><span class="line">   initEvents(vm)</span><br><span class="line">   initRender(vm)</span><br><span class="line">   callHook(vm, <span class="string">'beforeCreate'</span>)</span><br><span class="line">   initInjections(vm) <span class="comment">// resolve injections before data/props</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">// vm状态初始化</span></span><br><span class="line">   initState(vm)</span><br><span class="line">   initProvide(vm) <span class="comment">// resolve provide after data/props</span></span><br><span class="line">   callHook(vm, <span class="string">'created'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>其中实现响应式原理的基础在于<code>initState(vm)</code>，这里面实现了<code>props</code>，<code>methods</code>，<code>data</code>，<code>computed</code>，<code>watch</code>的初始化操作。前面有说过Vue是通过<code>Object.defineProperty</code>设置<code>setter</code>与<code>getter</code>来实现响应式的。那么具体是怎样实现的呢，主要依赖三个类：<code>Watcher</code>，<code>Dep</code>，<code>Observer</code><br>    <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (i--) &#123;</span><br><span class="line"><span class="keyword">const</span> key = keys[i]</span><br><span class="line"><span class="keyword">if</span> (process.env.NODE_ENV !== <span class="string">'production'</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (methods &amp;&amp; hasOwn(methods, key)) &#123;</span><br><span class="line">    warn(</span><br><span class="line">      <span class="string">`Method "<span class="subst">$&#123;key&#125;</span>" has already been defined as a data property.`</span>,</span><br><span class="line">      vm</span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (props &amp;&amp; hasOwn(props, key)) &#123;</span><br><span class="line">  process.env.NODE_ENV !== <span class="string">'production'</span> &amp;&amp; warn(</span><br><span class="line">    <span class="string">`The data property "<span class="subst">$&#123;key&#125;</span>" is already declared as a prop. `</span> +</span><br><span class="line">    <span class="string">`Use prop default value instead.`</span>,</span><br><span class="line">    vm</span><br><span class="line">  )</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (!isReserved(key)) &#123;</span><br><span class="line">  proxy(vm, <span class="string">`_data`</span>, key)</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// observe data</span></span><br><span class="line">observe(data, <span class="literal">true</span> <span class="comment">/* asRootData */</span>)</span><br></pre></td></tr></table></figure></p>
+<p> 这里的<code>observe</code>方法是将<code>data</code>变成可观察的，主要是实现了<code>setter</code>与<code>getter</code>方法，让<code>watcher</code>可以观察到数据的变化，那么我们来看看<code>observe</code>的实现：<br>    <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">Observer</span> </span>&#123;</span><br><span class="line">  value: any;</span><br><span class="line">  dep: Dep;</span><br><span class="line">  vmCount: number; <span class="comment">// number of vms that has this object as root $data</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">constructor</span> (value: any) &#123;</span><br><span class="line">    <span class="keyword">this</span>.value = value</span><br><span class="line">    <span class="keyword">this</span>.dep = <span class="keyword">new</span> Dep()</span><br><span class="line">    <span class="keyword">this</span>.vmCount = <span class="number">0</span></span><br><span class="line">    def(value, <span class="string">'__ob__'</span>, <span class="keyword">this</span>)</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">Array</span>.isArray(value)) &#123;</span><br><span class="line">      <span class="keyword">const</span> augment = hasProto</span><br><span class="line">        ? protoAugment</span><br><span class="line">        : copyAugment</span><br><span class="line">      augment(value, arrayMethods, arrayKeys)</span><br><span class="line">      <span class="keyword">this</span>.observeArray(value)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">this</span>.walk(value)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Walk through each property and convert them into</span></span><br><span class="line"><span class="comment">   * getter/setters. This method should only be called when</span></span><br><span class="line"><span class="comment">   * value type is Object.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  walk (obj: <span class="built_in">Object</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> keys = <span class="built_in">Object</span>.keys(obj)</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; keys.length; i++) &#123;</span><br><span class="line">      defineReactive(obj, keys[i])</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Observe a list of Array items.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  observeArray (items: <span class="built_in">Array</span>&lt;any&gt;) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>, l = items.length; i &lt; l; i++) &#123;</span><br><span class="line">      observe(items[i])</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过使用<code>walk</code>方法把<code>data</code>对象中数据使用<code>defineReactive</code>方法绑定<code>setter/getter</code>，从方法定义的名字来看有可知道作用是定义为可响应式的。<br>    <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// defineReactive方法是实现绑定的核心方法；</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">defineReactive</span>(<span class="params">obj, key, val</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> dep = <span class="keyword">new</span> Dep();</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">Object</span>.defineProperty(obj, key, &#123;</span><br><span class="line">        enumerable: <span class="literal">true</span>,</span><br><span class="line">        configurable: <span class="literal">true</span>,</span><br><span class="line">        get: <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (Dep.target) &#123;</span><br><span class="line">                dep.addSub(Dep.target)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> val;</span><br><span class="line">        &#125;,</span><br><span class="line">        set: <span class="function">(<span class="params">newValue</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (val === newVal) <span class="keyword">return</span>;</span><br><span class="line">           	<span class="comment">// 通知订阅者，数值发生改变了；</span></span><br><span class="line">            dep.notify();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>为每个data声明一个dep实例对象，随后这个dep就被对应的data给闭包应用了。简单说就是对某个值进行取值和修改时，它的dep实例都可以访问到，不会消失。通过Dep.target来判断是否要收集依赖，这个是全局变量，保存当前的watcher实例，在new Watcher()的时候进行赋值，赋值为当前Watcher实例。Dep是一个订阅者，主要用来存放<code>Watcher</code>观察者对象。<br>    <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dep</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span> () &#123;</span><br><span class="line">        <span class="comment">/* 用来存放Watcher对象的数组 */</span></span><br><span class="line">        <span class="keyword">this</span>.subs = [];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 在subs中添加一个Watcher对象 */</span></span><br><span class="line">    addSub (sub) &#123;</span><br><span class="line">        <span class="keyword">this</span>.subs.push(sub);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 通知所有Watcher对象更新视图 */</span></span><br><span class="line">    notify () &#123;</span><br><span class="line">        <span class="keyword">this</span>.subs.forEach(<span class="function">(<span class="params">sub</span>) =&gt;</span> &#123;</span><br><span class="line">            sub.update();</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>未完待续。。。。。</p>
 
-
-
-new Vue():  各种初始化的过程，源码入口有许多init函数，initMixin，stateMixin，eve
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/07/16/Vue的源码解析/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
       
     </div>
     
@@ -377,152 +381,36 @@ new Vue():  各种初始化的过程，源码入口有许多init函数，initMix
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://lamp_cyan.github.io/2018/07/12/理解-ES7-的-async-await/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="lamp_cyan">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="lamp_cyan">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/12/理解-ES7-的-async-await/" itemprop="url">理解 ES7 的 async/await</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-12T10:30:05+08:00">
-                2018-07-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-
+            <a href="/tags/技术/" rel="tag"># 技术</a>
           
-            
-          
-
-          
-          
-             <span id="/2018/07/12/理解-ES7-的-async-await/" class="leancloud_visitors" data-flag-title="理解 ES7 的 async/await">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          
-          进入正题之前，我们先看一下经典的面试题目：
-123456789for (var i = 0; i &lt; 5; i++) &#123;	(function(j) &#123;		setTimeout(() =&gt; &#123;			console.log(new Date, j);		&#12
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/07/12/理解-ES7-的-async-await/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/12/理解-ES7-的-async-await/" rel="next" title="理解 ES7 的 async/await">
+                <i class="fa fa-chevron-left"></i> 理解 ES7 的 async/await
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-
-    
-
-    <footer class="post-footer">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
       
 
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -532,10 +420,11 @@ new Vue():  各种初始化的过程，源码入口有许多init函数，initMix
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -543,6 +432,10 @@ new Vue():  各种初始化的过程，源码入口有许多init函数，initMix
 
 
           
+
+  
+
+
 
         </div>
         
@@ -563,8 +456,17 @@ new Vue():  各种初始化的过程，源码入口有许多init函数，initMix
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -629,6 +531,22 @@ new Vue():  各种初始化的过程，源码入口有许多init函数，initMix
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#响应式原理"><span class="nav-number">1.</span> <span class="nav-text">响应式原理</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -769,6 +687,10 @@ new Vue():  各种初始化的过程，源码入口有许多init函数，initMix
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
